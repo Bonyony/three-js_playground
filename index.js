@@ -6,7 +6,13 @@ import { OrbitControls } from "jsm/controls/OrbitControls.js";
 // setup the basics
 const w = window.innerWidth;
 const h = window.innerHeight;
-const renderer = new THREE.WebGLRenderer({ antialias: true });
+// sets up the canvas element. Best practice, but can be rendered without a canvas element
+const canvas = document.querySelector("#c");
+const renderer = new THREE.WebGLRenderer({
+  antialias: true,
+  canvas,
+  alpha: true,
+});
 renderer.setSize(w, h);
 document.body.appendChild(renderer.domElement);
 
@@ -26,6 +32,20 @@ camera.position.z = 14;
 const scene = new THREE.Scene();
 // sets color to the entire background
 scene.background = new THREE.Color("lightGray");
+
+// // adds a strong fog effect where getting closer to the render lessens the fog
+// {
+//   const color = 0xffffff;
+//   const density = 0.1;
+//   scene.fog = new THREE.FogExp2(color, density);
+// }
+// Adds a weak fog effect, lets you pick where it begins
+{
+  const color = "#99c2cc";
+  const near = 11;
+  const far = 35;
+  scene.fog = new THREE.Fog(color, near, far);
+}
 
 // Adds a plane of images
 // {
@@ -87,7 +107,7 @@ const wireMesh2 = new THREE.Mesh(geo, wireMat2);
 wireMesh.scale.setScalar(1.2);
 wireMesh2.scale.setScalar(1.4);
 mesh.add(wireMesh);
-// mesh.add(wireMesh2);
+mesh.add(wireMesh2);
 
 // basic shapes to play with
 {
@@ -109,10 +129,30 @@ mesh.add(wireMesh);
     sphereWidthDivisions,
     sphereHeightDivisions
   );
-  const sphereMat = new THREE.MeshPhongMaterial({ color: "#CA8" });
+  const loader = new THREE.TextureLoader();
+  const texture = loader.load("PXL_20240416_213110075.jpeg");
+  texture.colorSpace = THREE.SRGBColorSpace;
+
+  const sphereMat = new THREE.MeshPhongMaterial({ map: texture });
   const mesh = new THREE.Mesh(sphereGeo, sphereMat);
   mesh.position.set(-sphereRadius - 1, sphereRadius + 2, 0);
   scene.add(mesh);
+
+  function animate(t = 0) {
+    requestAnimationFrame(animate);
+    // these two lines make the sphere move through space
+    // mesh.position.y = t * 0.0002;
+    // mesh.position.x = t * 0.0002;
+    // mesh.position.z = t * 0.0002;
+
+    mesh.rotation.y = t * 0.0002;
+    mesh.rotation.x = t * 0.0001;
+
+    renderer.render(scene, camera);
+    // allows for mouse and scroll use
+    // controls.update();
+  }
+  animate();
 }
 
 // adds a basic lighting to the scene
@@ -131,8 +171,12 @@ scene.add(hemiLight);
 function animate(t = 0) {
   requestAnimationFrame(animate);
   // these two lines rotate the sphere
-  //   mesh.rotation.y = t * 0.0002;
-  //   mesh.rotation.x = t * 0.0001;
+  mesh.rotation.y = t * 0.0002;
+  mesh.rotation.x = t * 0.0001;
+  wireMesh.rotation.y = -t * 0.0002;
+  wireMesh.rotation.x = -t * 0.0001;
+  wireMesh2.rotation.y = t * 0.0004;
+  wireMesh2.rotation.x = t * 0.0002;
 
   renderer.render(scene, camera);
   // allows for mouse and scroll use
