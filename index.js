@@ -3,6 +3,10 @@ import * as THREE from "three";
 // this is OrbitControls, for moving the object with the mouse etc...
 import { OrbitControls } from "jsm/controls/OrbitControls.js";
 
+import { AsciiEffect } from "jsm/effects/AsciiEffect.js";
+import { TrackballControls } from "jsm/controls/TrackballControls.js";
+
+const start = Date.now();
 // setup the basics
 const w = window.innerWidth;
 const h = window.innerHeight;
@@ -33,6 +37,12 @@ const scene = new THREE.Scene();
 // sets color to the entire background
 scene.background = new THREE.Color("lightGray");
 
+// adds some pointed lights in the scene
+
+const pointLight2 = new THREE.PointLight("green", 1, 0, 0);
+pointLight2.position.set(-500, -500, -500);
+scene.add(pointLight2);
+
 // // adds a strong fog effect where getting closer to the render lessens the fog
 // {
 //   const color = 0xffffff;
@@ -40,12 +50,12 @@ scene.background = new THREE.Color("lightGray");
 //   scene.fog = new THREE.FogExp2(color, density);
 // }
 // Adds a weak fog effect, lets you pick where it begins
-{
-  const color = "#99c2cc";
-  const near = 11;
-  const far = 35;
-  scene.fog = new THREE.Fog(color, near, far);
-}
+// {
+//   const color = "#99c2cc";
+//   const near = 11;
+//   const far = 35;
+//   scene.fog = new THREE.Fog(color, near, far);
+// }
 
 // Adds a plane of images
 // {
@@ -118,6 +128,17 @@ mesh.add(wireMesh2);
   const mesh2 = new THREE.Mesh(cubeGeo, cubeMat);
   mesh2.position.set(cubeSize + 2, cubeSize / 6, 3);
   scene.add(mesh2);
+
+  function animate(t = 0) {
+    requestAnimationFrame(animate);
+
+    mesh2.rotation.y = Math.abs(Math.sin(t * 0.002)) * 0.25;
+    mesh2.rotation.x = Math.abs(Math.cos(t * 0.0003));
+    mesh2.rotation.z = Math.abs(Math.tan(t * 0.0003));
+
+    renderer.render(scene, camera);
+  }
+  animate();
 }
 {
   // Sphere
@@ -173,6 +194,7 @@ function animate(t = 0) {
   // these two lines rotate the sphere
   mesh.rotation.y = t * 0.0002;
   mesh.rotation.x = t * 0.0001;
+
   wireMesh.rotation.y = -t * 0.0002;
   wireMesh.rotation.x = -t * 0.0001;
   wireMesh2.rotation.y = t * 0.0004;
